@@ -90,6 +90,8 @@ def handler(request, context):
         if http_method == 'GET' and resource == '/endpoints':
             response = api_handler.endpoint.read(request)
             api_response.statusCode = 200
+            # TODO add the following: api_response.headers['Allow-...'] = '*'
+            # TODO add also the OPTIONS method to APi Gateway to allow CORS
             api_response.body = json.dumps(response)
 
         # DELETE endpoints : Delete an Endpoint

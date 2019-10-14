@@ -25,6 +25,10 @@ dynamodb_aws = boto3.client('dynamodb')
 iot_aws = boto3.client('iot')
 iot_data_aws = boto3.client('iot-data')
 
+#TODO replace hardcoded DDB table names with lambda env variables
+
+ENDPOINT_DETAILS_TABLE = 'SampleEndpointDetails'
+USER_TABLE = 'SampleUsers'
 
 class ApiHandlerEvent:
 
@@ -79,12 +83,14 @@ class ApiHandlerEvent:
                 try:
                     state = json_object['event']['endpoint']['state']  # Expect a string, ex: powerState
                     state_value = json_object['event']['endpoint']['value']  # Expect string or JSON
-                    namespace = json_object['event']['endpoint']['namespace']
                     instance = json_object['event']['endpoint'].get('instance', None)
+
                     if instance:
-                        state = instance+'.'+state
+                        state = instance + '.' + state
+                        namespace = self.get_namespace_from_endpoint_id(endpoint_id, instance = instance)
                         prop = AlexaResponse.create_context_property(instance=instance, namespace=namespace, name=state, value=state_value)
                     else:
+                        namespace = self.get_namespace_from_endpoint_id(endpoint_id, state = state)
                         prop = AlexaResponse.create_context_property(namespace=namespace, name=state, value=state_value)
                     # Update the IoT Thing Shadow state
                     msg = {
@@ -103,6 +109,7 @@ class ApiHandlerEvent:
                     print(result)
 
                     # Update Alexa with an Event Update
+                    #TODO Populate the context of the event based on interfaces that have not changed value
                     if endpoint_user_id == '0':
                         print('LOG Event: Not sent for user_id of 0')
                     else:
@@ -111,7 +118,7 @@ class ApiHandlerEvent:
                                 'cause': {
                                     'type': 'PHYSICAL_INTERACTION'
                                 },
-                                "properties": [
+                                'properties': [
                                     prop
                                 ]
                             }
@@ -120,7 +127,11 @@ class ApiHandlerEvent:
                         response = self.send_event('Alexa', 'ChangeReport', endpoint_id, token, payload)
 
                 except ClientError as e:
-                    alexa_response = AlexaResponse(name='ErrorResponse', message=e, payload={'type': 'INTERNAL_ERROR', 'message': e})
+                    alexa_response = AlexaResponse(name='ErrorResponse', message=e, payload={'type': 'INTERNAL_ERROR', 'message': str(e)})
+                    return alexa_response.get()
+                except Exception as e:
+                    alexa_response = AlexaResponse(name='ErrorResponse', message=e, payload={
+                                                   'type': 'INTERNAL_ERROR', 'message': str(e)})
                     return alexa_response.get()
 
             if event_type == 'DeleteReport':
@@ -148,10 +159,50 @@ class ApiHandlerEvent:
 
     # TODO Improve this with a database lookup
     @staticmethod
+    def get_namespace_from_endpoint_id(endpoint_id, state = None, instance = None):
+        print('LOG event.get_namespace_from_endpoint_id -----')
+        table = boto3.resource('dynamodb').Table(ENDPOINT_DETAILS_TABLE)
+        result = table.get_item(
+            Key={
+                'EndpointId': endpoint_id
+            },
+            AttributesToGet=[
+                'Capabilities'
+            ]
+        )
+
+        if result['ResponseMetadata']['HTTPStatusCode'] == 200:
+            if 'Item' in result:
+                print(
+                    'LOG event.get_namespace_from_endpoint_id.{}.get_item -----'.format(ENDPOINT_DETAILS_TABLE))
+                print(str(result['Item']))
+                if 'Capabilities' in result['Item']:
+                    cap = json.loads(result['Item']['Capabilities'])
+                    if instance == None:
+                        namespace = [x['interface'] for x in cap if 'properties' in x and state in [
+                            s['name'] for s in x['properties']['supported']]]
+                    else:
+                        namespace = [x['interface'] for x in cap if 'instance' in x and x['instance'] == instance]
+                    if len(namespace) == 1:
+                        return namespace[0]
+                    else:
+                        print('LOG ERROR event.get_namespace_from_endpoint_id.{}.get_item - Could not determine namespace from input {}, {}, {}'.format(ENDPOINT_DETAILS_TABLE, endpoint_id, state, instance))
+                        raise Exception('Could not determine the namespace')        
+                else:
+                    print ('LOG ERROR - missing Capabilities in response')
+                    raise Exception('Missing Capabilities in table')
+                
+        
+
+        
+
+    # TODO Improve this with a database lookup
+    @staticmethod
     def get_sku_details(sku):
 
         # Set the default at OTHER (OT00)
-        sku_details = dict(description='A sample endpoint', manufacturer_name='Sample Manufacturer', display_categories=['OTHER'])
+        sku_details = dict(description='A sample endpoint',
+                           manufacturer_name='Sample Manufacturer', display_categories=['OTHER'])
 
         if sku.upper().startswith('LI'):
             sku_details['description'] = 'A sample light endpoint'
@@ -173,7 +224,7 @@ class ApiHandlerEvent:
 
     def get_user_info(self, endpoint_user_id):
         print('LOG event.create.get_user_info -----')
-        table = boto3.resource('dynamodb').Table('SampleUsers')
+        table = boto3.resource('dynamodb').Table(USER_TABLE)
         result = table.get_item(
             Key={
                 'UserId': endpoint_user_id
@@ -192,7 +243,7 @@ class ApiHandlerEvent:
 
         if result['ResponseMetadata']['HTTPStatusCode'] == 200:
             if 'Item' in result:
-                print('LOG event.create.get_user_info.SampleUsers.get_item -----')
+                print('LOG event.create.get_user_info.{}.get_item -----'.format(USER_TABLE))
                 print(str(result['Item']))
                 if 'ExpirationUTC' in result['Item']:
                     expiration_utc = result['Item']['ExpirationUTC']
@@ -237,7 +288,7 @@ class ApiHandlerEvent:
                         },
                         ReturnValues="UPDATED_NEW"
                     )
-                    print('LOG event.create.send_event.SampleUsers.update_item:', str(result))
+                    print('LOG event.create.send_event.{}.update_item: {}'.format(USER_TABLE, str(result)))
 
                     # TODO Return an error here if the token could not be refreshed
                 else:
