@@ -13,13 +13,13 @@
 
 import json
 from datetime import datetime, timedelta
-
+import os
 import boto3
 from botocore.exceptions import ClientError
 
 from alexa.skills.smarthome import AlexaResponse
 from jsonschema import validate, SchemaError, ValidationError
-from .api_auth import ApiAuth
+from .api_auth_cognito import ApiAuth
 from .api_handler_endpoint import ApiHandlerEndpoint
 
 dynamodb_aws = boto3.client('dynamodb')
@@ -30,6 +30,10 @@ DEFAULT_VAL = {
     'Alexa.RangeController': 1,
     'Alexa.PowerController': 'OFF'
 }
+
+ENDPOINT_DETAILS_TABLE = os.environ['ENDPOINT_DETAILS_TABLE']
+USER_TABLE = os.environ['USER_TABLE']
+SKU_TABLE = os.environ['SKU_TABLE']
 
 class ApiHandlerDirective:
 
@@ -59,8 +63,8 @@ class ApiHandlerDirective:
 
                 if name == 'ReportState':
                     # Get the User ID from the access_token
-                    response_user_id = json.loads(ApiAuth.get_user_id(token).read().decode('utf-8'))
-                    result = dynamodb_aws.get_item(TableName='SampleEndpointDetails', Key={'EndpointId': {'S': endpoint_id}})
+                    response_user_id = ApiAuth.get_user_id(token)
+                    result = dynamodb_aws.get_item(TableName=ENDPOINT_DETAILS_TABLE, Key={'EndpointId': {'S': endpoint_id}})
                     capabilities_string = self.get_db_value(result['Item']['Capabilities'])
                     capabilities = json.loads(capabilities_string)
                     props=[]
@@ -112,8 +116,8 @@ class ApiHandlerDirective:
                         'expires_in': 9000
                     }
                 else:
-                    # Get the User ID
-                    response_user_id = json.loads(ApiAuth.get_user_id(grantee_token).read().decode('utf-8'))
+                    # Get the User ID __ this methods assume the user_id comes from LWA - should be refactored
+                    response_user_id = ApiAuth.get_user_id(grantee_token)
                     if 'error' in response_user_id:
                         print('ERROR api_handler_directive.process.authorization.user_id:', response_user_id['error_description'])
                         return AlexaResponse(name='ErrorResponse', payload={'type': 'INTERNAL_ERROR', 'message': response_user_id})
@@ -142,7 +146,7 @@ class ApiHandlerDirective:
                 expiration_utc = datetime.utcnow() + timedelta(seconds=(int(expires_in) - 5))
 
                 # Store the User Information - This is useful for inspection during development
-                table = boto3.resource('dynamodb').Table('SampleUsers')
+                table = boto3.resource('dynamodb').Table(USER_TABLE)
                 result = table.put_item(
                     Item={
                         'UserId': user_id,
@@ -187,7 +191,7 @@ class ApiHandlerDirective:
                     print('WARN api_handler_directive.process.discovery.user_id: Using development user_id of 0')
                     user_id = "0"  # <- Useful for development
                 else:
-                    response_user_id = json.loads(ApiAuth.get_user_id(access_token).read().decode('utf-8'))
+                    response_user_id = ApiAuth.get_user_id(access_token)
                     if 'error' in response_user_id:
                         print('ERROR api_handler_directive.process.discovery.user_id: ' + response_user_id['error_description'])
                     user_id = response_user_id['user_id']
@@ -209,7 +213,7 @@ class ApiHandlerDirective:
                             endpoint_details = ApiHandlerEndpoint.EndpointDetails()
                             endpoint_details.id = str(thing['thingName'])
                             print('LOG api_handler_directive.process.discovery: Found:', endpoint_details.id, 'for user:', user_id)
-                            result = dynamodb_aws.get_item(TableName='SampleEndpointDetails', Key={'EndpointId': {'S': endpoint_details.id}})
+                            result = dynamodb_aws.get_item(TableName=ENDPOINT_DETAILS_TABLE, Key={'EndpointId': {'S': endpoint_details.id}})
                             capabilities_string = self.get_db_value(result['Item']['Capabilities'])
                             endpoint_details.capabilities = json.loads(capabilities_string)
                             endpoint_details.description = self.get_db_value(result['Item']['Description'])
@@ -237,7 +241,7 @@ class ApiHandlerDirective:
                 token = json_object['directive']['endpoint']['scope']['token']
                 endpoint_id = json_object['directive']['endpoint']['endpointId']
 
-                response_user_id = json.loads(ApiAuth.get_user_id(token).read().decode('utf-8'))
+                response_user_id = ApiAuth.get_user_id(token)
                 if 'error' in response_user_id:
                     print('ERROR api_handler_directive.process.power_controller.user_id: ' + response_user_id['error_description'])
                 user_id = response_user_id['user_id']
@@ -282,7 +286,7 @@ class ApiHandlerDirective:
                 token = json_object['directive']['endpoint']['scope']['token']
                 endpoint_id = json_object['directive']['endpoint']['endpointId']
                 
-                result = dynamodb_aws.get_item(TableName='SampleEndpointDetails', Key={'EndpointId': {'S': endpoint_id}})
+                result = dynamodb_aws.get_item(TableName=ENDPOINT_DETAILS_TABLE, Key={'EndpointId': {'S': endpoint_id}})
                 capabilities_string = self.get_db_value(result['Item']['Capabilities'])
                 capabilities = json.loads(capabilities_string)
                 

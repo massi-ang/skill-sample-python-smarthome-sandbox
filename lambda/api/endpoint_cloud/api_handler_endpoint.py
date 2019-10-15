@@ -12,7 +12,7 @@
 # language governing permissions and limitations under the License.
 
 import json
-
+import os
 import boto3
 from botocore.exceptions import ClientError
 
@@ -24,6 +24,9 @@ iot_aws = boto3.client('iot')
 
 samples_thing_group_name = 'Samples'
 
+ENDPOINT_DETAILS_TABLE = os.environ['ENDPOINT_DETAILS_TABLE']
+USER_TABLE = os.environ['USER_TABLE']
+SKU_TABLE = os.environ['SKU_TABLE']
 
 class ApiHandlerEndpoint:
     class EndpointDetails:
@@ -73,9 +76,12 @@ class ApiHandlerEndpoint:
             json_object = json.loads(request['body'])
             endpoint = json_object['event']['endpoint']
             endpoint_details.user_id = endpoint['userId']  # Expect a Profile
-            endpoint_details.capabilities = endpoint['capabilities']
             endpoint_details.sku = endpoint['sku']  # A custom endpoint type, ex: SW01
+            # endpoint['capabilities'] # look up from SKU
+            endpoint_details.capabilities = self.get_capabilities_from_sku(
+                endpoint_details.sku)
 
+            #TODO: Derive name from SKU
             if 'friendlyName' in endpoint:
                 endpoint_details.friendly_name = endpoint['friendlyName']
 
@@ -84,7 +90,8 @@ class ApiHandlerEndpoint:
 
             if 'description' in endpoint:
                 endpoint_details.description = endpoint['description']
-
+            
+            #TODO: Derive display categories from SKU
             if 'displayCategories' in endpoint:
                 endpoint_details.display_categories = endpoint['displayCategories']
 
@@ -94,12 +101,16 @@ class ApiHandlerEndpoint:
                 response = self.create_thing_group(samples_thing_group_name)
                 if not ApiUtils.check_response(response):
                     print('ERR api_handler_endpoint.create.create_thing_group.response', response)
+            
+            # Create the thing in AWS IoT or map it to existing thing
+            if not 'thingName' in endpoint:
+                response = self.create_thing(endpoint_details)
+                if not ApiUtils.check_response(response):
+                    print('ERR api_handler_endpoint.create.create_thing.response', response)
+            else:
+                #TODO get the SKU from the thing that is being added
+                endpoint_details.id = endpoint['thingName']
 
-            # Create the thing in AWS IoT
-            response = self.create_thing(endpoint_details)
-            if not ApiUtils.check_response(response):
-                print('ERR api_handler_endpoint.create.create_thing.response', response)
-                
             # Create the thing details in DynamoDb
             response = self.create_thing_details(endpoint_details)
             if not ApiUtils.check_response(response):
@@ -139,7 +150,7 @@ class ApiHandlerEndpoint:
                 thingTypeName=thing_type_name,
                 attributePayload={
                     'attributes': {
-                        'user_id': endpoint_details.user_id
+                        'sku': endpoint_details.sku
                     }
                 }
             )
@@ -154,13 +165,109 @@ class ApiHandlerEndpoint:
         except Exception as e:
             print(e)
             return None
-            
+
+    @staticmethod
+    def get_capabilities_from_sku(sku):
+        capabilities = []
+        if sku.upper().startswith('LI'):
+            capabilities= [
+                {
+                    "type": "AlexaInterface",
+                    "interface": "Alexa",
+                    "version": "3"
+                },
+                {
+                    "type": "AlexaInterface",
+                    "interface": "Alexa.PowerController",
+                    "version": "3",
+                    "properties": {
+                        "supported": [
+                            {
+                                "name": "powerState"
+                            }
+                        ],
+                        "proactivelyReported": True,
+                        "retrievable": True
+                    }
+                }
+            ]
+
+        if sku.upper().startswith('MW'):
+            capabilities = [
+                {
+                    "type": "AlexaInterface",
+                    "interface": "Alexa",
+                    "version": "3"
+                },
+                {
+                    "type": "AlexaInterface",
+                    "interface": "Alexa.PowerController",
+                    "version": "3",
+                    "properties": {
+                        "supported": [
+                            {
+                                "name": "powerState"
+                            }
+                        ],
+                        "proactivelyReported": True,
+                        "retrievable": True
+                    }
+                }
+            ]
+
+        if sku.upper().startswith('SW'):
+            capabilities = [
+                {
+                    "type": "AlexaInterface",
+                    "interface": "Alexa",
+                    "version": "3"
+                },
+                {
+                    "type": "AlexaInterface",
+                    "interface": "Alexa.PowerController",
+                    "version": "3",
+                    "properties": {
+                        "supported": [
+                            {
+                                "name": "powerState"
+                            }
+                        ],
+                        "proactivelyReported": True,
+                        "retrievable": True
+                    }
+                }
+            ]
+
+        if sku.upper().startswith('TT'):
+            capabilities = [
+                {
+                    "type": "AlexaInterface",
+                    "interface": "Alexa",
+                    "version": "3"
+                },
+                {
+                    "type": "AlexaInterface",
+                    "interface": "Alexa.PowerController",
+                    "version": "3",
+                    "properties": {
+                        "supported": [
+                            {
+                                "name": "powerState"
+                            }
+                        ],
+                        "proactivelyReported": True,
+                        "retrievable": True
+                    }
+                }
+            ]
+        return json.dumps(capabilities)
+
     @staticmethod
     def create_thing_details(endpoint_details):
         print('LOG api_handler_endpoint.create_thing_details -----')
         print('LOG api_handler_endpoint.create_thing_details.endpoint_details', endpoint_details.dump())
         dynamodb_aws_resource = boto3.resource('dynamodb')
-        table = dynamodb_aws_resource.Table('SampleEndpointDetails')
+        table = dynamodb_aws_resource.Table(ENDPOINT_DETAILS_TABLE)
         print('LOG api_handler_endpoint.create_thing_details Updating Item in SampleEndpointDetails')
         try:
             response = table.update_item(
@@ -259,7 +366,7 @@ class ApiHandlerEndpoint:
 
             for endpoint_id in endpoint_ids:
                 iot_aws.delete_thing(thingName=endpoint_id)
-                response = dynamodb_aws.delete_item(TableName='SampleEndpointDetails', Key={'EndpointId': endpoint_id})
+                response = dynamodb_aws.delete_item(TableName=ENDPOINT_DETAILS_TABLE, Key={'EndpointId': endpoint_id})
                 # TODO Check Response
                 # TODO UPDATE ALEXA!
                 # Send AddOrUpdateReport to Alexa Event Gateway
@@ -270,7 +377,7 @@ class ApiHandlerEndpoint:
             return "KeyError: " + str(key_error)
 
     def delete_samples(self):
-        table = boto3.resource('dynamodb').Table('SampleEndpointDetails')
+        table = boto3.resource('dynamodb').Table(ENDPOINT_DETAILS_TABLE)
         result = table.scan()
         items = result['Items']
         for item in items:
@@ -283,7 +390,7 @@ class ApiHandlerEndpoint:
 
         # Delete from DynamoDB
         response = dynamodb_aws.delete_item(
-            TableName='SampleEndpointDetails',
+            TableName=ENDPOINT_DETAILS_TABLE,
             Key={'EndpointId': {'S': endpoint_id}}
         )
         print('LOG api_handler_endpoint.delete_thing.dynamodb_aws.delete_item.response -----')

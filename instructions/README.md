@@ -20,3 +20,6 @@ For the manual instructions, follow these steps in order.
 8. [Test the Endpoints](08-test-endpoints.md)
 9. [Send an Event](09-send-an-event.md)
 10. [Clean Up](10-cleanup.md)
+
+
+https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateUrl=https%3A%2F%2Fendpoint-code-us-test.s3.amazonaws.com%2Fbackend.template

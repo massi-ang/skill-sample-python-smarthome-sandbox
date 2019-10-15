@@ -1,257 +1,5 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Metadata": {
-        "AWS::CloudFormation::Designer": {
-            "d8f2cbf2-b078-4a55-af97-8529c63802a1": {
-                "size": {
-                    "width": 640,
-                    "height": 210
-                },
-                "position": {
-                    "x": 380,
-                    "y": 420
-                },
-                "z": 1,
-                "embeds": [
-                    "cc4e52a9-25df-4d31-ad4b-b3ee141b1916",
-                    "2d3a592a-42e6-42a5-a2bb-1748704afce8",
-                    "fa89ca5f-72f3-4ce3-bbb9-91f310a15074",
-                    "c31ac23f-2b25-4c28-a219-f6c1ca2a705b",
-                    "d1cfcc76-4e56-40d6-bee4-b1f0b2151636",
-                    "9e21c442-bc71-435d-96b8-6efe8197c753",
-                    "bfa42395-a1f8-43d0-844d-9e13044c5aca"
-                ],
-                "dependson": [
-                    "e72bad17-15cb-4c76-9f2c-75082b95e2f2"
-                ]
-            },
-            "d1cfcc76-4e56-40d6-bee4-b1f0b2151636": {
-                "size": {
-                    "width": 240,
-                    "height": 150
-                },
-                "position": {
-                    "x": 580,
-                    "y": 460
-                },
-                "z": 2,
-                "parent": "d8f2cbf2-b078-4a55-af97-8529c63802a1",
-                "embeds": [],
-                "isassociatedwith": [
-                    "d8f2cbf2-b078-4a55-af97-8529c63802a1"
-                ]
-            },
-            "e72bad17-15cb-4c76-9f2c-75082b95e2f2": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 90,
-                    "y": 510
-                },
-                "z": 1,
-                "embeds": [],
-                "isrelatedto": [
-                    "a14a9328-385c-45aa-a29d-a61b8d7e3772",
-                    "d8f2cbf2-b078-4a55-af97-8529c63802a1"
-                ]
-            },
-            "a14a9328-385c-45aa-a29d-a61b8d7e3772": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 90,
-                    "y": 610
-                },
-                "z": 1,
-                "embeds": []
-            },
-            "bfa42395-a1f8-43d0-844d-9e13044c5aca": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 620,
-                    "y": 500
-                },
-                "z": 3,
-                "parent": "d8f2cbf2-b078-4a55-af97-8529c63802a1",
-                "embeds": []
-            },
-            "e8c0152e-8429-4b8f-9598-191d6cce7e3f": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 680,
-                    "y": 330
-                },
-                "z": 1,
-                "embeds": [],
-                "isassociatedwith": [
-                    "d8f2cbf2-b078-4a55-af97-8529c63802a1"
-                ],
-                "dependson": [
-                    "bfa42395-a1f8-43d0-844d-9e13044c5aca",
-                    "c31ac23f-2b25-4c28-a219-f6c1ca2a705b",
-                    "2d3a592a-42e6-42a5-a2bb-1748704afce8",
-                    "9e21c442-bc71-435d-96b8-6efe8197c753"
-                ]
-            },
-            "afbd5395-df05-4a4c-a601-8ce08b46bcce": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 90,
-                    "y": 410
-                },
-                "z": 1,
-                "embeds": [],
-                "isassociatedwith": [
-                    "e72bad17-15cb-4c76-9f2c-75082b95e2f2"
-                ],
-                "isrelatedto": [
-                    "d8f2cbf2-b078-4a55-af97-8529c63802a1"
-                ]
-            },
-            "fa89ca5f-72f3-4ce3-bbb9-91f310a15074": {
-                "size": {
-                    "width": 150,
-                    "height": 150
-                },
-                "position": {
-                    "x": 400,
-                    "y": 460
-                },
-                "z": 2,
-                "parent": "d8f2cbf2-b078-4a55-af97-8529c63802a1",
-                "embeds": [],
-                "isassociatedwith": [
-                    "d8f2cbf2-b078-4a55-af97-8529c63802a1"
-                ]
-            },
-            "c31ac23f-2b25-4c28-a219-f6c1ca2a705b": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 450,
-                    "y": 500
-                },
-                "z": 3,
-                "parent": "d8f2cbf2-b078-4a55-af97-8529c63802a1",
-                "embeds": []
-            },
-            "26fac247-a842-4309-b4f1-cd006cf8291d": {
-                "source": {
-                    "id": "e8c0152e-8429-4b8f-9598-191d6cce7e3f"
-                },
-                "target": {
-                    "id": "bfa42395-a1f8-43d0-844d-9e13044c5aca"
-                },
-                "z": 2
-            },
-            "9b4469b5-2c82-4c42-a08d-2138b6682fdd": {
-                "source": {
-                    "id": "e8c0152e-8429-4b8f-9598-191d6cce7e3f"
-                },
-                "target": {
-                    "id": "c31ac23f-2b25-4c28-a219-f6c1ca2a705b"
-                },
-                "z": 3
-            },
-            "20cfe202-9d82-45b1-91fa-a021f8506c96": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 90,
-                    "y": 690
-                },
-                "z": 1,
-                "embeds": []
-            },
-            "291865df-5774-4990-91d2-5ccabf280f09": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 170,
-                    "y": 690
-                },
-                "z": 1,
-                "embeds": []
-            },
-            "cc4e52a9-25df-4d31-ad4b-b3ee141b1916": {
-                "size": {
-                    "width": 150,
-                    "height": 150
-                },
-                "position": {
-                    "x": 850,
-                    "y": 460
-                },
-                "z": 2,
-                "parent": "d8f2cbf2-b078-4a55-af97-8529c63802a1",
-                "embeds": [],
-                "isassociatedwith": [
-                    "d8f2cbf2-b078-4a55-af97-8529c63802a1"
-                ]
-            },
-            "2d3a592a-42e6-42a5-a2bb-1748704afce8": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 900,
-                    "y": 500
-                },
-                "z": 3,
-                "parent": "d8f2cbf2-b078-4a55-af97-8529c63802a1",
-                "embeds": []
-            },
-            "b28f24ae-cd93-4a3e-a6ab-6ded346669b6": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 180,
-                    "y": 560
-                },
-                "z": 1,
-                "embeds": [],
-                "isrelatedto": [
-                    "a14a9328-385c-45aa-a29d-a61b8d7e3772",
-                    "d8f2cbf2-b078-4a55-af97-8529c63802a1"
-                ]
-            },
-            "9e21c442-bc71-435d-96b8-6efe8197c753": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 720,
-                    "y": 500
-                },
-                "z": 3,
-                "parent": "d8f2cbf2-b078-4a55-af97-8529c63802a1",
-                "embeds": []
-            }
-        }
-    },
     "Resources": {
         "EndpointRestApi": {
             "Type": "AWS::ApiGateway::RestApi",
@@ -259,18 +7,13 @@
                 "Name": "Endpoint Cloud",
                 "Description": "An Endpoint Cloud"
             },
-            "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "d8f2cbf2-b078-4a55-af97-8529c63802a1"
-                }
-            },
             "DependsOn": []
         },
         "EndpointLambda": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
                 "Code": {
-                    "S3Bucket": "endpoint-code-us",
+                    "S3Bucket": "endpoint-code-us-test",
                     "S3Key": "endpoint-package.zip"
                 },
                 "Description": "API Lambda to communicate with Endpoints",
@@ -278,6 +21,15 @@
                     "Variables": {
                         "api_id": {
                             "Ref": "EndpointRestApi"
+                        },
+                        "USER_TABLE": {
+                            "Ref": "UsersTable"
+                        },
+                        "ENDPOINT_DETAILS_TABLE": {
+                            "Ref": "EndpointDetailsTable"
+                        },
+                        "SKU_TABLE": {
+                            "Ref": "SKUTable"
                         }
                     }
                 },
@@ -289,13 +41,8 @@
                         "Arn"
                     ]
                 },
-                "Runtime": "python3.6",
-                "Timeout": "6"
-            },
-            "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "e72bad17-15cb-4c76-9f2c-75082b95e2f2"
-                }
+                "Runtime": "python3.7",
+                "Timeout": 6
             }
         },
         "EndpointsResource": {
@@ -310,11 +57,6 @@
                 "PathPart": "endpoints",
                 "RestApiId": {
                     "Ref": "EndpointRestApi"
-                }
-            },
-            "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "d1cfcc76-4e56-40d6-bee4-b1f0b2151636"
                 }
             }
         },
@@ -343,7 +85,7 @@
                 "Path": "/",
                 "Policies": [
                     {
-                        "PolicyName": "EndpointLambdaExecutionRolePolicy",
+                        "PolicyName": "EndpointLambdaExecutionRolePolicy-Test",
                         "PolicyDocument": {
                             "Version": "2012-10-17",
                             "Statement": [
@@ -390,12 +132,7 @@
                         }
                     }
                 ],
-                "RoleName": "EndpointLambdaExecutionRole"
-            },
-            "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "a14a9328-385c-45aa-a29d-a61b8d7e3772"
-                }
+                "RoleName": "EndpointLambdaExecutionRole-Test"
             }
         },
         "EndpointApiDeploymentProd": {
@@ -405,11 +142,6 @@
                     "Ref": "EndpointRestApi"
                 },
                 "StageName": "prod"
-            },
-            "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "e8c0152e-8429-4b8f-9598-191d6cce7e3f"
-                }
             },
             "DependsOn": [
                 "EndpointsMethodGet",
@@ -449,11 +181,6 @@
                         ]
                     ]
                 }
-            },
-            "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "afbd5395-df05-4a4c-a601-8ce08b46bcce"
-                }
             }
         },
         "DirectivesResource": {
@@ -468,11 +195,6 @@
                 "PathPart": "directives",
                 "RestApiId": {
                     "Ref": "EndpointRestApi"
-                }
-            },
-            "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "fa89ca5f-72f3-4ce3-bbb9-91f310a15074"
                 }
             }
         },
@@ -494,11 +216,6 @@
                         "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EndpointLambda.Arn}/invocations"
                     }
                 }
-            },
-            "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "bfa42395-a1f8-43d0-844d-9e13044c5aca"
-                }
             }
         },
         "DirectivesMethodPost": {
@@ -518,11 +235,6 @@
                     "Uri": {
                         "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EndpointLambda.Arn}/invocations"
                     }
-                }
-            },
-            "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "c31ac23f-2b25-4c28-a219-f6c1ca2a705b"
                 }
             }
         },
@@ -544,12 +256,6 @@
                 "ProvisionedThroughput": {
                     "ReadCapacityUnits": "5",
                     "WriteCapacityUnits": "5"
-                },
-                "TableName": "SampleEndpointDetails"
-            },
-            "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "20cfe202-9d82-45b1-91fa-a021f8506c96"
                 }
             }
         },
@@ -565,11 +271,6 @@
                 "PathPart": "events",
                 "RestApiId": {
                     "Ref": "EndpointRestApi"
-                }
-            },
-            "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "cc4e52a9-25df-4d31-ad4b-b3ee141b1916"
                 }
             }
         },
@@ -590,11 +291,6 @@
                     "Uri": {
                         "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EndpointLambda.Arn}/invocations"
                     }
-                }
-            },
-            "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "2d3a592a-42e6-42a5-a2bb-1748704afce8"
                 }
             }
         },
@@ -621,13 +317,8 @@
                         "Arn"
                     ]
                 },
-                "Runtime": "python3.6",
-                "Timeout": "7"
-            },
-            "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "b28f24ae-cd93-4a3e-a6ab-6ded346669b6"
-                }
+                "Runtime": "python3.7",
+                "Timeout": 7
             }
         },
         "EndpointsMethodPost": {
@@ -648,11 +339,6 @@
                         "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EndpointLambda.Arn}/invocations"
                     }
                 }
-            },
-            "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "9e21c442-bc71-435d-96b8-6efe8197c753"
-                }
             }
         },
         "UsersTable": {
@@ -671,14 +357,29 @@
                     }
                 ],
                 "ProvisionedThroughput": {
-                    "ReadCapacityUnits": "5",
-                    "WriteCapacityUnits": "5"
-                },
-                "TableName": "SampleUsers"
-            },
-            "Metadata": {
-                "AWS::CloudFormation::Designer": {
-                    "id": "291865df-5774-4990-91d2-5ccabf280f09"
+                    "ReadCapacityUnits": 5,
+                    "WriteCapacityUnits": 5
+                }
+            }
+        },
+        "SKUTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+                "AttributeDefinitions": [
+                    {
+                        "AttributeName": "SKU",
+                        "AttributeType": "S"
+                    }
+                ],
+                "KeySchema": [
+                    {
+                        "AttributeName": "SKU",
+                        "KeyType": "HASH"
+                    }
+                ],
+                "ProvisionedThroughput": {
+                    "ReadCapacityUnits": 5,
+                    "WriteCapacityUnits": 5
                 }
             }
         }
@@ -693,7 +394,7 @@
                 ]
             },
             "Export": {
-                "Name": "skill-lambda-id"
+                "Name": "skill-lambda-id-test"
             }
         },
         "EndpointApiId": {
@@ -702,7 +403,7 @@
                 "Ref": "EndpointRestApi"
             },
             "Export": {
-                "Name": "endpoint-api-id"
+                "Name": "endpoint-api-id-test"
             }
         },
         "EndpointApiUrl": {
@@ -724,7 +425,7 @@
                 ]
             },
             "Export": {
-                "Name": "endpoint-api-url"
+                "Name": "endpoint-api-url-test"
             }
         },
         "EndpointApiAuthRedirectUrl": {
@@ -746,7 +447,7 @@
                 ]
             },
             "Export": {
-                "Name": "endpoint-api-auth-redirect-url"
+                "Name": "endpoint-api-auth-redirect-url-test"
             }
         }
     }

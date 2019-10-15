@@ -14,17 +14,20 @@
 import http.client
 import json
 from datetime import datetime, timedelta
-
+import os
 import boto3
 from botocore.exceptions import ClientError
 
 from alexa.skills.smarthome import AlexaResponse
-from .api_auth import ApiAuth
+from .api_auth_cognito import ApiAuth
 
 dynamodb_aws = boto3.client('dynamodb')
 iot_aws = boto3.client('iot')
 iot_data_aws = boto3.client('iot-data')
 
+ENDPOINT_DETAILS_TABLE = os.environ['ENDPOINT_DETAILS_TABLE']
+USER_TABLE = os.environ['USER_TABLE']
+SKU_TABLE = os.environ['SKU_TABLE']
 
 class ApiHandlerEvent:
 
@@ -173,7 +176,7 @@ class ApiHandlerEvent:
 
     def get_user_info(self, endpoint_user_id):
         print('LOG event.create.get_user_info -----')
-        table = boto3.resource('dynamodb').Table('SampleUsers')
+        table = boto3.resource('dynamodb').Table(USER_TABLE)
         result = table.get_item(
             Key={
                 'UserId': endpoint_user_id
