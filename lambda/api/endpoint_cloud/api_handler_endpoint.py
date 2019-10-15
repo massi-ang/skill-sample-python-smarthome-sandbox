@@ -14,6 +14,7 @@
 import json
 import os
 import boto3
+from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
 
 from endpoint_cloud.api_handler_event import ApiHandlerEvent
@@ -85,6 +86,8 @@ class ApiHandlerEndpoint:
             if 'friendlyName' in endpoint:
                 endpoint_details.friendly_name = endpoint['friendlyName']
 
+            # The following parameters are all optional and will be overridden anyway in the Alexa Event
+            # the risk is that the Data from an Alexa Event and a Discovery will differ
             if 'manufacturerName' in endpoint:
                 endpoint_details.manufacturer_name = endpoint['manufacturerName']
 
@@ -124,7 +127,7 @@ class ApiHandlerEndpoint:
             # Send an Event that updates Alexa
             endpoint = {
                 'userId': endpoint_details.user_id,
-                'id': 'SAMPLE_ENDPOINT_' + ApiUtils.get_code_string(8),
+                'id': endpoint_details.id,
                 'friendlyName': endpoint_details.friendly_name,
                 'sku': endpoint_details.sku,
                 'capabilities': endpoint_details.capabilities
@@ -260,7 +263,7 @@ class ApiHandlerEndpoint:
                     }
                 }
             ]
-        return json.dumps(capabilities)
+        return capabilities
 
     @staticmethod
     def create_thing_details(endpoint_details):
@@ -410,9 +413,15 @@ class ApiHandlerEndpoint:
             resource = request['resource']
             if resource == '/endpoints':
                 parameters = request['queryStringParameters']
-                if parameters is not None and 'endpoint_id' in parameters:
-                    endpoint_id = request['queryStringParameters']['endpoint_id']
-                    response = self.read_thing(endpoint_id)
+                print(
+                    'LOG api_handler_endpoint.read: parameters {}'.format(parameters))
+                if parameters is not None:
+                    if 'endpoint_id' in parameters:
+                        endpoint_id = request['queryStringParameters']['endpoint_id']
+                        response = self.read_thing(endpoint_id)
+                    elif 'user_id' in parameters:
+                        user_id = request['queryStringParameters']['user_id']
+                        response = self.list_things(user_id)
                 else:
                     list_response = iot_aws.list_things()
                     # TODO List things only in the Samples Thing Group
@@ -437,6 +446,35 @@ class ApiHandlerEndpoint:
     @staticmethod
     def read_thing(endpoint_id):
         return iot_aws.describe_thing(thingName=endpoint_id)
+
+    @staticmethod
+    def list_things(user_id):
+        iot_data = boto3.client('iot-data')
+        ddb = boto3.resource('dynamodb')
+        endpoint_table = ddb.Table(ENDPOINT_DETAILS_TABLE)
+        # Add a GSI to the table
+        devices = endpoint_table.scan(FilterExpression=Attr('UserId').eq(user_id))['Items']
+        response = []
+        print('LOG api_handler_directive.process.discovery.devices: found {} devices'.format(len(devices)))
+        for d in devices:
+            description = {
+                'id': d['EndpointId'],
+                'description': d['Description'],
+                'friendly_name': d['FriendlyName'],
+                'sku': d['SKU']
+            }
+            try:
+                shadow = iot_data.get_thing_shadow(thingName=d['EndpointId'])
+                shadow_json = json.loads(shadow['payload'].read())
+                if 'state' in shadow_json and 'reported' in shadow_json['state']:
+                    description['state'] = shadow_json['state']['reported']
+                else:
+                    description['state'] = {}
+            except Exception as ex:
+                description['state'] = {}
+            response.append(description)
+        return response
+            
 
     # TODO Work in Progress: Update the Endpoint Details
     @staticmethod

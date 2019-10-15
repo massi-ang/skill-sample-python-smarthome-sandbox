@@ -16,6 +16,7 @@ from datetime import datetime, timedelta
 import os
 import boto3
 from botocore.exceptions import ClientError
+from boto3.dynamodb.conditions import Key, Attr
 
 from alexa.skills.smarthome import AlexaResponse
 from jsonschema import validate, SchemaError, ValidationError
@@ -200,36 +201,33 @@ class ApiHandlerDirective:
                 adr = AlexaResponse(namespace='Alexa.Discovery', name='Discover.Response')
 
                 # Get the list of endpoints to return for a User ID and add them to the response
-                # Use the AWS IoT entries for state but get the discovery details from DynamoDB
-                # Wanted to list by group name but that requires a second lookup for the details
-                # iot_aws.list_things_in_thing_group(thingGroupName="Samples")
-                list_response = iot_aws.list_things()
+                # Use the Endpoint table to lookup the devices
 
-                # Get a list of sample things by the user_id attribute
-                for thing in list_response['things']:
-                    if 'user_id' in thing['attributes']:
-                        if thing['attributes']['user_id'] == user_id:
-                            # We have an endpoint thing!
-                            endpoint_details = ApiHandlerEndpoint.EndpointDetails()
-                            endpoint_details.id = str(thing['thingName'])
-                            print('LOG api_handler_directive.process.discovery: Found:', endpoint_details.id, 'for user:', user_id)
-                            result = dynamodb_aws.get_item(TableName=ENDPOINT_DETAILS_TABLE, Key={'EndpointId': {'S': endpoint_details.id}})
-                            capabilities_string = self.get_db_value(result['Item']['Capabilities'])
-                            endpoint_details.capabilities = json.loads(capabilities_string)
-                            endpoint_details.description = self.get_db_value(result['Item']['Description'])
-                            endpoint_details.display_categories = json.loads(self.get_db_value(result['Item']['DisplayCategories']))
-                            endpoint_details.friendly_name = self.get_db_value(result['Item']['FriendlyName'])
-                            endpoint_details.manufacturer_name = self.get_db_value(result['Item']['ManufacturerName'])
-                            endpoint_details.sku = self.get_db_value(result['Item']['SKU'])
-                            endpoint_details.user_id = self.get_db_value(result['Item']['UserId'])
+                ddb = boto3.resource('dynamodb')
+                endpoint_table = ddb.Table(ENDPOINT_DETAILS_TABLE)
+                # Add a GSI to the table
+                devices = endpoint_table.scan(FilterExpression=Attr('UserId').eq(user_id))['Items']
+ 
+                print('LOG api_handler_directive.process.discovery.devices: found {} devices'.format(len(devices)))
+                for d in devices:
+                    endpoint_details = ApiHandlerEndpoint.EndpointDetails()
+                    endpoint_details.id = d['EndpointId']
+                    print('LOG api_handler_directive.process.discovery: Found:', endpoint_details.id, 'for user:', user_id)
+                    capabilities_string = d['Capabilities']
+                    endpoint_details.capabilities = json.loads(capabilities_string)
+                    endpoint_details.description = d['Description']
+                    endpoint_details.display_categories = json.loads(d['DisplayCategories'])
+                    endpoint_details.friendly_name = d['FriendlyName']
+                    endpoint_details.manufacturer_name = d['ManufacturerName']
+                    endpoint_details.sku = d['SKU']
+                    endpoint_details.user_id = user_id
 
-                            adr.add_payload_endpoint(
-                                friendly_name=endpoint_details.friendly_name,
-                                endpoint_id=endpoint_details.id,
-                                capabilities=endpoint_details.capabilities,
-                                display_categories=endpoint_details.display_categories,
-                                manufacturer_name=endpoint_details.manufacturer_name
-                                )
+                    adr.add_payload_endpoint(
+                        friendly_name=endpoint_details.friendly_name,
+                        endpoint_id=endpoint_details.id,
+                        capabilities=endpoint_details.capabilities,
+                        display_categories=endpoint_details.display_categories,
+                        manufacturer_name=endpoint_details.manufacturer_name)
 
                 response = adr.get()
 
@@ -265,6 +263,7 @@ class ApiHandlerDirective:
                     response_update = iot_data_aws.update_thing_shadow(thingName=endpoint_id, payload=mqtt_msg.encode())
                     print('LOG api_handler_directive.process.power_controller.response_update -----')
                     print(response_update)
+                    # Is this correct? The change is asynchronous and should be reported via an event by the Thing
                     alexa_response = AlexaResponse(token=token, correlation_token=correlation_token, endpoint_id=endpoint_id)
                     alexa_response.add_context_property(namespace='Alexa.PowerController', name='powerState', value=power_state_value)
                     alexa_response.add_context_property()
