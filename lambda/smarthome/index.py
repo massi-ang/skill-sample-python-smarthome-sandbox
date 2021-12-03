@@ -18,10 +18,13 @@ from urllib.request import HTTPError
 
 
 def get_api_url(api_id, aws_region, resource):
-    return 'https://{0}.execute-api.{1}.amazonaws.com/prod/{2}'.format(api_id, aws_region, resource)
-
+    '''
+    '''
+    return 'https://{0}.execute-api.{1}.amazonaws.com/{2}'.format(api_id, aws_region, resource)
 
 def handler(request, context):
+    '''
+    '''
     try:
         print("LOG skill.index.handler.request -----")
         print(json.dumps(request))

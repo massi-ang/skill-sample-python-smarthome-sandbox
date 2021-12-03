@@ -21,10 +21,13 @@ from botocore.exceptions import ClientError
 from alexa.skills.smarthome import AlexaResponse
 from .api_auth import ApiAuth
 
+import os
+
 dynamodb_aws = boto3.client('dynamodb')
 iot_aws = boto3.client('iot')
 iot_data_aws = boto3.client('iot-data')
 
+USERS_TABLE = os.getenv('USERS_TABLE', 'Users')
 
 class ApiHandlerEvent:
 
@@ -173,7 +176,7 @@ class ApiHandlerEvent:
 
     def get_user_info(self, endpoint_user_id):
         print('LOG event.create.get_user_info -----')
-        table = boto3.resource('dynamodb').Table('SampleUsers')
+        table = boto3.resource('dynamodb').Table(USERS_TABLE)
         result = table.get_item(
             Key={
                 'UserId': endpoint_user_id
@@ -192,7 +195,7 @@ class ApiHandlerEvent:
 
         if result['ResponseMetadata']['HTTPStatusCode'] == 200:
             if 'Item' in result:
-                print('LOG event.create.get_user_info.SampleUsers.get_item -----')
+                print('LOG event.create.get_user_info.Users.get_item -----')
                 print(str(result['Item']))
                 if 'ExpirationUTC' in result['Item']:
                     expiration_utc = result['Item']['ExpirationUTC']
@@ -237,7 +240,7 @@ class ApiHandlerEvent:
                         },
                         ReturnValues="UPDATED_NEW"
                     )
-                    print('LOG event.create.send_event.SampleUsers.update_item:', str(result))
+                    print('LOG event.create.send_event.Users.update_item:', str(result))
 
                     # TODO Return an error here if the token could not be refreshed
                 else:
@@ -261,7 +264,7 @@ class ApiHandlerEvent:
     @staticmethod
     def send_event(alexa_namespace, alexa_name, endpoint_id, token, payload):
 
-        remove_endpoint = alexa_name is not "ChangeReport"
+        remove_endpoint = alexa_name != "ChangeReport"
         alexa_response = AlexaResponse(namespace=alexa_namespace, name=alexa_name, endpoint_id=endpoint_id, token=token, remove_endpoint=remove_endpoint)
         alexa_response.set_payload(payload)
         payload = json.dumps(alexa_response.get())

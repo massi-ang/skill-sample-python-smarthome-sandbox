@@ -40,7 +40,7 @@ class ApiAuth:
     def get_user_id(access_token):
         connection = http.client.HTTPSConnection('api.amazon.com')
         connection.request('GET', '/user/profile?access_token=' + access_token)
-        return connection.getresponse()
+        return connection.getresponse().read()
 
     def refresh_access_token(self, refresh_token, client_id, client_secret, redirect_uri):
         payload = {

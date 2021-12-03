@@ -64,6 +64,9 @@ class AlexaResponse:
     def __str__(self):
         return str(self.get())
 
+    def set_name(self, *, name):
+        self.event['header']['name'] = name
+
     def add_context_property(self, **kwargs):
         self.context_properties.append(self.create_context_property(**kwargs))
 

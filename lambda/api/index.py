@@ -19,7 +19,7 @@ from endpoint_cloud import ApiHandler, ApiResponse, ApiResponseBody
 
 
 def get_api_url(api_id, aws_region, resource):
-    return 'https://{0}.execute-api.{1}.amazonaws.com/prod/{2}'.format(api_id, aws_region, resource)
+    return 'https://{0}.execute-api.{1}.amazonaws.com/{2}'.format(api_id, aws_region, resource)
 
 
 def handler(request, context):
@@ -65,11 +65,10 @@ def handler(request, context):
             return api_response.get()
 
         # Route the inbound request by evaluating for the resource and HTTP method
-        resource = request["resource"]
-        http_method = request["httpMethod"]
+        route_key = request["routeKey"]
 
         # POST to directives : Process an Alexa Directive - This will be used to implement Endpoint behavior and state
-        if http_method == 'POST' and resource == '/directives':
+        if route_key == 'POST /directives':
             response = api_handler.directive.process(request, env_client_id, env_client_secret, get_api_url(env_api_id, env_aws_default_region, 'auth-redirect'))
             if response['event']['header']['name'] == 'ErrorResponse':
                 error_message = response['event']['payload']['message']['error_description']
@@ -81,25 +80,25 @@ def handler(request, context):
                 api_response.body = json.dumps(response)
 
         # POST to endpoints : Create an Endpoint
-        if http_method == 'POST' and resource == '/endpoints':
+        if route_key == 'POST /endpoints':
             response = api_handler.endpoint.create(request)
             api_response.statusCode = 200
             api_response.body = json.dumps(response)
 
         # GET endpoints : List Endpoints
-        if http_method == 'GET' and resource == '/endpoints':
+        if route_key == 'GET /endpoints':
             response = api_handler.endpoint.read(request)
             api_response.statusCode = 200
             api_response.body = json.dumps(response)
 
         # DELETE endpoints : Delete an Endpoint
-        if http_method == 'DELETE' and resource == '/endpoints':
+        if route_key  == 'DELETE /endpoints':
             response = api_handler.endpoint.delete(request)
             api_response.statusCode = 200
             api_response.body = json.dumps(response)
 
         # POST to event : Create an Event
-        if http_method == 'POST' and resource == '/events':
+        if route_key == 'POST /events':
             response = api_handler.event.create(request)
             print('LOG api.index.handler.request.api_handler.event.create.response:', response)
             api_response.statusCode = 200

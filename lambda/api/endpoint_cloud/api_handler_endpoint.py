@@ -19,6 +19,8 @@ from botocore.exceptions import ClientError
 from endpoint_cloud.api_handler_event import ApiHandlerEvent
 from .api_utils import ApiUtils
 
+import os
+
 dynamodb_aws = boto3.client('dynamodb')
 iot_aws = boto3.client('iot')
 
@@ -160,7 +162,7 @@ class ApiHandlerEndpoint:
         print('LOG api_handler_endpoint.create_thing_details -----')
         print('LOG api_handler_endpoint.create_thing_details.endpoint_details', endpoint_details.dump())
         dynamodb_aws_resource = boto3.resource('dynamodb')
-        table = dynamodb_aws_resource.Table('SampleEndpointDetails')
+        table = dynamodb_aws_resource.Table(ENDPOINT_DETAILS_TABLE)
         print('LOG api_handler_endpoint.create_thing_details Updating Item in SampleEndpointDetails')
         try:
             response = table.update_item(
@@ -259,7 +261,7 @@ class ApiHandlerEndpoint:
 
             for endpoint_id in endpoint_ids:
                 iot_aws.delete_thing(thingName=endpoint_id)
-                response = dynamodb_aws.delete_item(TableName='SampleEndpointDetails', Key={'EndpointId': endpoint_id})
+                response = dynamodb_aws.delete_item(TableName=ENDPOINT_DETAILS_TABLE, Key={'EndpointId': endpoint_id})
                 # TODO Check Response
                 # TODO UPDATE ALEXA!
                 # Send AddOrUpdateReport to Alexa Event Gateway
@@ -270,7 +272,7 @@ class ApiHandlerEndpoint:
             return "KeyError: " + str(key_error)
 
     def delete_samples(self):
-        table = boto3.resource('dynamodb').Table('SampleEndpointDetails')
+        table = boto3.resource('dynamodb').Table(ENDPOINT_DETAILS_TABLE)
         result = table.scan()
         items = result['Items']
         for item in items:
@@ -283,7 +285,7 @@ class ApiHandlerEndpoint:
 
         # Delete from DynamoDB
         response = dynamodb_aws.delete_item(
-            TableName='SampleEndpointDetails',
+            TableName=ENDPOINT_DETAILS_TABLE,
             Key={'EndpointId': {'S': endpoint_id}}
         )
         print('LOG api_handler_endpoint.delete_thing.dynamodb_aws.delete_item.response -----')
@@ -300,22 +302,20 @@ class ApiHandlerEndpoint:
     def read(self, request):
         try:
             response = {}
-            resource = request['resource']
-            if resource == '/endpoints':
-                parameters = request['queryStringParameters']
-                if parameters is not None and 'endpoint_id' in parameters:
-                    endpoint_id = request['queryStringParameters']['endpoint_id']
-                    response = self.read_thing(endpoint_id)
-                else:
-                    list_response = iot_aws.list_things()
-                    # TODO List things only in the Samples Thing Group
-                    # list_response = iot_aws.list_things_in_thing_group(thingGroupName=thing_group_name)
-                    status = list_response['ResponseMetadata']['HTTPStatusCode']
-                    if 200 <= int(status) < 300:
-                        things = list_response['things']
-                        response = []
-                        for thing in things:
-                            response.append(thing)
+            parameters = request['queryStringParameters']
+            if parameters is not None and 'endpoint_id' in parameters:
+                endpoint_id = request['queryStringParameters']['endpoint_id']
+                response = self.read_thing(endpoint_id)
+            else:
+                list_response = iot_aws.list_things()
+                # TODO List things only in the Samples Thing Group
+                # list_response = iot_aws.list_things_in_thing_group(thingGroupName=thing_group_name)
+                status = list_response['ResponseMetadata']['HTTPStatusCode']
+                if 200 <= int(status) < 300:
+                    things = list_response['things']
+                    response = []
+                    for thing in things:
+                        response.append(thing)
 
             print('LOG api_handler_endpoint.read -----')
             print(json.dumps(response))
