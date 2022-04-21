@@ -15,19 +15,17 @@ import json
 
 
 class ApiResponseBody:
-
     def __init__(self, **kwargs):
         self.body = {}
-        self.result = kwargs.get('result', "OK")
-        self.message = kwargs.get('message', "")
+        self.result = kwargs.get("result", "OK")
+        self.message = kwargs.get("message", "")
 
     def __repr__(self):
         return self.create()
 
     def create(self):
-        self.body['result'] = self.result
+        self.body["result"] = self.result
         if self.message:  # Check for an empty message
-            self.body['message'] = self.message
+            self.body["message"] = self.message
 
         return json.dumps(self.body)
-

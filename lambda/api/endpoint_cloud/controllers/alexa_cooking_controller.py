@@ -3,8 +3,8 @@
 
 from .base_controller import BaseController
 
+
 class AlexaCookingController(BaseController):
     def process(self):
         if self.name == "SetCookingMode":
             return self.alexa_response
-            

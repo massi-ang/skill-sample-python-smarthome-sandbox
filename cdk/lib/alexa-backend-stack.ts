@@ -1,6 +1,6 @@
 import { CfnRoute, HttpApi, HttpAuthorizer, HttpAuthorizerType, HttpMethod } from '@aws-cdk/aws-apigatewayv2';
 import { LambdaProxyIntegration } from '@aws-cdk/aws-apigatewayv2-integrations';
-import { AttributeType, Table } from '@aws-cdk/aws-dynamodb';
+import { AttributeType, ProjectionType, Table } from '@aws-cdk/aws-dynamodb';
 import { Effect, PolicyStatement } from '@aws-cdk/aws-iam';
 import { Code, Function, Runtime } from '@aws-cdk/aws-lambda';
 import * as cdk from '@aws-cdk/core';
@@ -32,6 +32,15 @@ export class AlexaBackendStack extends cdk.Stack {
       readCapacity: 5,
       writeCapacity: 5,
     });
+
+    endpointsDetailsTable.addGlobalSecondaryIndex({
+      partitionKey: {
+        name: "UserId",
+        type: AttributeType.STRING
+      },
+      indexName: "byUserId",
+      projectionType: ProjectionType.ALL
+    })
 
 
     /**
@@ -180,6 +189,16 @@ export class AlexaBackendStack extends cdk.Stack {
     new CfnOutput(this, 'SkillAdapterLambdaArn', {
       value: skillLambda.functionArn,
       description: 'Skill Adapter Lambda ARN'
+    });
+
+    new CfnOutput(this, 'EndpointDetailsTableOutput', {
+      value: endpointsDetailsTable.tableName,
+      description: 'Endpoint Details Table Name'
+    });
+
+    new CfnOutput(this, 'UsersTableOutput', {
+      value: usersTable.tableName,
+      description: 'Users Table Name'
     });
   }
 }

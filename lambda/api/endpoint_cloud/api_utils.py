@@ -14,17 +14,18 @@
 import datetime
 import random
 import string
+import logging
 
+logger = logging.getLogger(__name__)
 
 class ApiUtils:
-
     @staticmethod
     def check_response(response):
         if response is None:
-            print('ERR ApiUtils.check_response is None')
+            logger.error("ApiUtils.check_response is None")
             return False
-        if response['ResponseMetadata']['HTTPStatusCode'] != 200:
-            print('ERR ApiUtils.check_response.HTTPStatusCode', response)
+        if response["ResponseMetadata"]["HTTPStatusCode"] != 200:
+            logger.error("ApiUtils.check_response.HTTPStatusCode %s", response)
             return False
         else:
             return True
@@ -44,7 +45,7 @@ class ApiUtils:
         :param size:  The length of the code as an int
         :return: string code
         """
-        return ''.join(random.choices(string.ascii_uppercase + string.digits, k=size))
+        return "".join(random.choices(string.ascii_uppercase + string.digits, k=size))
 
     @staticmethod
     def get_random_color_string():
@@ -52,4 +53,17 @@ class ApiUtils:
         A random color name string composed of uppercase ASCII and digits
         :return: string color
         """
-        return random.choice(['Beige', 'Blue', 'Brown', 'Cyan', 'Green', 'Magenta', 'Orange', 'Red', 'Violet', 'Yellow'])
+        return random.choice(
+            [
+                "Beige",
+                "Blue",
+                "Brown",
+                "Cyan",
+                "Green",
+                "Magenta",
+                "Orange",
+                "Red",
+                "Violet",
+                "Yellow",
+            ]
+        )

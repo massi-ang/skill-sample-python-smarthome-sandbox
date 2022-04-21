@@ -2,7 +2,7 @@
   "event": {
     "endpoint": {
       "userId": "INVALID",
-      "friendlyName": "White Sample Switch",
+      "friendlyName": "Chicken light",
       "capabilities": [
         {
           "type": "AlexaInterface",
@@ -24,11 +24,11 @@
           }
         }
       ],
-      "sku": "SW01-S3M-KR76",
-      "description": "A Sample Switch",
+      "sku": "LI01-KR76",
+      "description": "A simple light",
       "manufacturerName": "Sample Manufacturer",
       "displayCategories": [
-        "SWITCH"
+        "LIGHT"
       ]
     }
   }

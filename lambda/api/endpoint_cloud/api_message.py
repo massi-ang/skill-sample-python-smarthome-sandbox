@@ -13,12 +13,11 @@
 
 
 class ApiMessage:
-
     def __init__(self, **kwargs):
-        self.context = kwargs.get('context', {})
-        self.header = kwargs.get('header', {})
-        self.endpoint = kwargs.get('endpoint', {})
-        self.payload = kwargs.get('payload', {})
+        self.context = kwargs.get("context", {})
+        self.header = kwargs.get("header", {})
+        self.endpoint = kwargs.get("endpoint", {})
+        self.payload = kwargs.get("payload", {})
 
     def validate(self):
 

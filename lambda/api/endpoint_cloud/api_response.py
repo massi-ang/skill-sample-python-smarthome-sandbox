@@ -15,10 +15,9 @@ from .api_response_body import ApiResponseBody
 
 
 class ApiResponse:
-
     def __init__(self, **kwargs):
-        self.isBase64Encoded = kwargs.get('isBase64Encoded', False)
-        self.statusCode = kwargs.get('statusCode', 200)
+        self.isBase64Encoded = kwargs.get("isBase64Encoded", False)
+        self.statusCode = kwargs.get("statusCode", 200)
         self.headers = {}
         self.body = ApiResponseBody()
         self.response = {}
@@ -27,11 +26,11 @@ class ApiResponse:
         return self.get()
 
     def get(self):
-        self.headers['Content-Type'] = 'application/json'
+        self.headers["Content-Type"] = "application/json"
 
-        self.response['isBase64Encoded'] = str(self.isBase64Encoded)
-        self.response['statusCode'] = str(self.statusCode)
-        self.response['headers'] = self.headers
-        self.response['body'] = str(self.body)
+        self.response["isBase64Encoded"] = str(self.isBase64Encoded)
+        self.response["statusCode"] = str(self.statusCode)
+        self.response["headers"] = self.headers
+        self.response["body"] = str(self.body)
 
         return self.response

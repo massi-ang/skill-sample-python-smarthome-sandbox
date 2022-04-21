@@ -10,46 +10,57 @@
 # or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
-
+"""
+Module for authentication
+"""
 import http.client
 from urllib.parse import urlencode
 
 
 class ApiAuth:
-
+    """Class to implement Authentication for the IdP
+    """
     def post_to_api(self, payload):
+        """Post payload to LWA API
+        """
         connection = http.client.HTTPSConnection("api.amazon.com")
         headers = {
-            'content-type': "application/x-www-form-urlencoded",
-            'cache-control': "no-cache"
+            "content-type": "application/x-www-form-urlencoded",
+            "cache-control": "no-cache",
         }
-        connection.request('POST', '/auth/o2/token', urlencode(payload), headers)
+        connection.request("POST", "/auth/o2/token", urlencode(payload), headers)
         return connection.getresponse()
 
     def get_access_token(self, code, client_id, client_secret, redirect_uri):
+        """Get access token from LWA
+        """
         payload = {
-            'grant_type': 'authorization_code',
-            'code': code,
-            'client_id': client_id,
-            'client_secret': client_secret,
-            'redirect_uri': redirect_uri
+            "grant_type": "authorization_code",
+            "code": code,
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "redirect_uri": redirect_uri,
         }
         return self.post_to_api(payload)
 
     @staticmethod
     def get_user_id(access_token):
-        connection = http.client.HTTPSConnection('api.amazon.com')
-        connection.request('GET', '/user/profile?access_token=' + access_token)
+        """Get user id from LWA
+        """
+        connection = http.client.HTTPSConnection("api.amazon.com")
+        connection.request("GET", "/user/profile?access_token=" + access_token)
         return connection.getresponse().read()
 
-    def refresh_access_token(self, refresh_token, client_id, client_secret, redirect_uri):
+    def refresh_access_token(
+        self, refresh_token, client_id, client_secret, redirect_uri
+    ):
+        """Refresh access token from LWA
+        """
         payload = {
-            'grant_type': 'refresh_token',
-            'refresh_token': refresh_token,
-            'client_id': client_id,
-            'client_secret': client_secret,
-            'redirect_uri': redirect_uri
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token,
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "redirect_uri": redirect_uri,
         }
         return self.post_to_api(payload)
-
-

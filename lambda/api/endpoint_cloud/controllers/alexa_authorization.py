@@ -3,11 +3,13 @@
 
 import json
 import boto3
-from  datetime import datetime, timedelta
-
+from datetime import datetime, timedelta
+import os
 from alexa.skills.smarthome.alexa_response import AlexaResponse
 from endpoint_cloud.api_auth import ApiAuth
 from .base_controller import BaseController
+
+USERS_TABLE = os.getenv("USERS_TABLE", "Users")
 
 class AlexaAuthorization(BaseController):
     def process(self, client_id, client_secret, redirect_uri) -> AlexaResponse:
@@ -32,7 +34,7 @@ class AlexaAuthorization(BaseController):
                     self.user_id["error_description"],
                 )
                 return self.make_error_response(
-                    payload={
+                    e={
                         "type": "INTERNAL_ERROR",
                         "message": self.user_id,
                     },
@@ -62,7 +64,7 @@ class AlexaAuthorization(BaseController):
         )
 
         response_token_string = response_token.read().decode("utf-8")
-        
+
         print(
             "LOG api_handler_directive.process.authorization.response_token_string:",
             response_token_string,
@@ -79,9 +81,7 @@ class AlexaAuthorization(BaseController):
         expires_in = response_object["expires_in"]
 
         # Calculate expiration
-        expiration_utc = datetime.utcnow() + timedelta(
-            seconds=(int(expires_in) - 5)
-        )
+        expiration_utc = datetime.utcnow() + timedelta(seconds=(int(expires_in) - 5))
 
         # Store the User Information - This is useful for inspection during development
         table = boto3.resource("dynamodb").Table(USERS_TABLE)
@@ -93,9 +93,7 @@ class AlexaAuthorization(BaseController):
                 "AccessToken": access_token,
                 "ClientId": client_id,
                 "ClientSecret": client_secret,
-                "ExpirationUTC": expiration_utc.strftime(
-                    "%Y-%m-%dT%H:%M:%S.00Z"
-                ),
+                "ExpirationUTC": expiration_utc.strftime("%Y-%m-%dT%H:%M:%S.00Z"),
                 "RedirectUri": redirect_uri,
                 "RefreshToken": refresh_token,
                 "TokenType": token_type,
@@ -112,8 +110,5 @@ class AlexaAuthorization(BaseController):
             )
         else:
             error_message = "Error creating User"
-            print(
-                "ERR api_handler_directive.process.authorization", error_message
-            )
+            print("ERR api_handler_directive.process.authorization", error_message)
             return self.make_error_response(error_message)
-            

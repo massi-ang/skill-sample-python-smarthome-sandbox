@@ -19,7 +19,9 @@ from endpoint_cloud import ApiHandler, ApiResponse, ApiResponseBody
 
 
 def get_api_url(api_id, aws_region, resource):
-    return 'https://{0}.execute-api.{1}.amazonaws.com/{2}'.format(api_id, aws_region, resource)
+    return "https://{0}.execute-api.{1}.amazonaws.com/{2}".format(
+        api_id, aws_region, resource
+    )
 
 
 def handler(request, context):
@@ -43,35 +45,51 @@ def handler(request, context):
         # Get the Environment Variables, these are used to dynamically compose the API URI and pass Alexa Skill Messaging credentials
 
         # Get the Region
-        env_aws_default_region = os.environ.get('AWS_DEFAULT_REGION', None)
+        env_aws_default_region = os.environ.get("AWS_DEFAULT_REGION", None)
         if env_aws_default_region is None:
-            print("ERROR skill.index.handler.aws_default_region is None default to us-east-1")
-            env_aws_default_region = 'us-east-1'
+            print(
+                "ERROR skill.index.handler.aws_default_region is None default to us-east-1"
+            )
+            env_aws_default_region = "us-east-1"
 
         # Get the API ID, Client ID, and Client Secret
-        env_api_id = os.environ.get('api_id', None)
-        env_client_id = os.environ.get('client_id', None)
-        env_client_secret = os.environ.get('client_secret', None)
+        env_api_id = os.environ.get("api_id", None)
+        env_client_id = os.environ.get("client_id", None)
+        env_client_secret = os.environ.get("client_secret", None)
         if env_api_id is None or env_client_id is None or env_client_secret is None:
             api_response.statusCode = 403
-            api_response.body = ApiResponseBody(result="ERR", message="Environment variable is not set: api_id:{0} client_id:{1} client_secret:{2}".format(env_api_id, env_client_id, env_client_secret))
+            api_response.body = ApiResponseBody(
+                result="ERR",
+                message="Environment variable is not set: api_id:{0} client_id:{1} client_secret:{2}".format(
+                    env_api_id, env_client_id, env_client_secret
+                ),
+            )
             return api_response.get()
 
         # Reject the request if it isn't from our API
-        api_id = request['requestContext']['apiId']
+        api_id = request["requestContext"]["apiId"]
         if api_id != env_api_id:
             api_response.statusCode = 403
-            api_response.body = ApiResponseBody(result="ERR", message="api_id did not match")
+            api_response.body = ApiResponseBody(
+                result="ERR", message="api_id did not match"
+            )
             return api_response.get()
 
         # Route the inbound request by evaluating for the resource and HTTP method
         route_key = request["routeKey"]
 
         # POST to directives : Process an Alexa Directive - This will be used to implement Endpoint behavior and state
-        if route_key == 'POST /directives':
-            response = api_handler.directive.process(request, env_client_id, env_client_secret, get_api_url(env_api_id, env_aws_default_region, 'auth-redirect'))
-            if response['event']['header']['name'] == 'ErrorResponse':
-                error_message = response['event']['payload']['message']['error_description']
+        if route_key == "POST /directives":
+            response = api_handler.directive.process(
+                request,
+                env_client_id,
+                env_client_secret,
+                get_api_url(env_api_id, env_aws_default_region, "auth-redirect"),
+            )
+            if response["event"]["header"]["name"] == "ErrorResponse":
+                error_message = response["event"]["payload"]["message"][
+                    "error_description"
+                ]
                 api_response.statusCode = 500
                 api_response.body = ApiResponseBody(result="ERR", message=error_message)
                 return api_response.get()
@@ -80,27 +98,30 @@ def handler(request, context):
                 api_response.body = json.dumps(response)
 
         # POST to endpoints : Create an Endpoint
-        if route_key == 'POST /endpoints':
+        if route_key == "POST /endpoints":
             response = api_handler.endpoint.create(request)
             api_response.statusCode = 200
             api_response.body = json.dumps(response)
 
         # GET endpoints : List Endpoints
-        if route_key == 'GET /endpoints':
+        if route_key == "GET /endpoints":
             response = api_handler.endpoint.read(request)
             api_response.statusCode = 200
             api_response.body = json.dumps(response)
 
         # DELETE endpoints : Delete an Endpoint
-        if route_key  == 'DELETE /endpoints':
+        if route_key == "DELETE /endpoints":
             response = api_handler.endpoint.delete(request)
             api_response.statusCode = 200
             api_response.body = json.dumps(response)
 
         # POST to event : Create an Event
-        if route_key == 'POST /events':
+        if route_key == "POST /events":
             response = api_handler.event.create(request)
-            print('LOG api.index.handler.request.api_handler.event.create.response:', response)
+            print(
+                "LOG api.index.handler.request.api_handler.event.create.response:",
+                response,
+            )
             api_response.statusCode = 200
             api_response.body = json.dumps(response)
 
@@ -109,14 +130,14 @@ def handler(request, context):
         message_string = "KeyError: " + str(key_error)
 
         # Dump a traceback to help in debugging
-        print('TRACEBACK:START')
+        print("TRACEBACK:START")
         traceback.print_tb(sys.exc_info()[2])
-        print('TRACEBACK:END')
+        print("TRACEBACK:END")
 
         api_response.statusCode = 400
         api_response.body = ApiResponseBody(result="ERR", message=message_string)
 
-    print('LOG api.index.handler.api_handler -----')
+    print("LOG api.index.handler.api_handler -----")
     print(json.dumps(api_response.get()))
 
     return api_response.get()

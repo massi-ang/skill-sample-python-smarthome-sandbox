@@ -1,0 +1,35 @@
+{
+  "event": {
+    "endpoint": {
+      "userId": "INVALID",
+      "friendlyName": "Chicken temperature",
+      "capabilities": [
+        {
+          "type": "AlexaInterface",
+          "interface": "Alexa",
+          "version": "3"
+        },
+        {
+          "type": "AlexaInterface",
+          "interface": "Alexa.TemperatureSensor",
+          "version": "3",
+          "properties": {
+            "supported": [
+              {
+                "name": "temperature"
+              }
+            ],
+            "proactivelyReported": false,
+            "retrievable": true
+          }
+        }
+      ],
+      "sku": "TS00-V001",
+      "description": "A temperature sensor",
+      "manufacturerName": "Sample Manufacturer",
+      "displayCategories": [
+        "TEMPERATURE_SENSOR"
+      ]
+    }
+  }
+}
